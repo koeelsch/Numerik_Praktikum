@@ -8,7 +8,6 @@ using namespace std;
 gute Erklärung zum Code: https://www.delftstack.com/de/howto/cpp/read-text-file-into-2d-array-in-cpp/ 
 Hinweise von Paul: 
 - anpassend es Pfads bei ifstream
-- bisher werden die Länge/Breite des Bildes nicht ausgelesen und müssen manuell gelöscht werden
 
 */
 
@@ -34,8 +33,8 @@ int main() {
     }
 
     // Dateien öffnen
-    ifstream inputfile_1("C:/Users/Flix/Desktop/xyz_1.txt");
-    ifstream inputfile_2("C:/Users/Flix/Desktop/xyz_2.txt"); 
+    ifstream inputfile_1("C:/Users/Flix/Desktop/Paul/Rohdaten/Date_Messdaten_TVL_96.dat");
+    ifstream inputfile_2("C:/Users/Flix/Desktop/Paul/Rohdaten/Date_Messdaten_TVL_97.dat"); 
 
     if (!(inputfile_1.is_open() && inputfile_2.is_open())) {
         cout << "Fehler 1" << endl;
@@ -43,6 +42,11 @@ int main() {
     }
 
     // Rohdaten in data_1 und data_2 speichern
+    int format [2];
+    int just_wasting_storage;
+    inputfile_1 >> format[0]; // 947
+    inputfile_1 >> format[1]; //693
+    inputfile_2 >> just_wasting_storage >> just_wasting_storage; // das ist notwendig, dass die ersten beiden Zahlen jeder Datei "ignoriert" werden
     for (int z = 0; z < zeile; z++) {  
         for (int s = 0; s < spalte; s++) {  
             inputfile_1 >> data_1[z][s]; 
@@ -64,12 +68,14 @@ int main() {
     }
 */
     // nur best. Felder zum Testen ausgeben
-    for (int z = 0; z < 3; z++) {
+    
+    for (int z = 0; z < 1; z++) {
         for (int s = 0; s < spalte; s++) {
             // cout << "Feld aus data_1 [" <<z<<"] ["<<s<<"] = "<< data_1 [z] [s]<<endl;
             cout << "Feld aus data_2 [" <<z<<"] ["<<s<<"] = "<< data_2 [z] [s]<<endl;
         }
     }
+    cout << "Das Bild hat folgendes Format: " <<format[0]<<" x "<<format[1]<<endl;
 
 
     // Speicher freigeben
