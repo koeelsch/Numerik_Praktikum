@@ -1,0 +1,83 @@
+#include <fstream>
+#include <iostream>
+
+using namespace std;
+
+/*
+
+gute Erklärung zum Code: https://www.delftstack.com/de/howto/cpp/read-text-file-into-2d-array-in-cpp/ 
+Hinweise von Paul: 
+- anpassend es Pfads bei ifstream
+- bisher werden die Länge/Breite des Bildes nicht ausgelesen und müssen manuell gelöscht werden
+
+*/
+
+int main() {
+    /* noch nicht fertig
+    // alle Dateien öffnen und auslesen
+    int anz_dateien = 10; //Anzahl .dat Dateien, die ausgelesen werden sollen; Nummerierung beginnt bei Nr. 96
+    for (int i = 96; i <= anz_dateien; i++) {
+        string dateiname = "C:/Users/Flix/Desktop/Paul/Rohdaten/Date_Messdaten_TVL_" + to_string(i) + ".dat";
+        ifstream input_file
+    }
+    */
+
+    int zeile = 693; // Zeilen müssen flexibel gestaltet werden
+    int spalte = 947; // Spalten
+
+    // allokieren (?) des Speichers für die beiden Arrays data_1 und data_2
+    int** data_1 = new int*[zeile];
+    int** data_2 = new int*[zeile];
+    for (int i = 0; i < zeile; i++) {
+        data_1[i] = new int[spalte];
+        data_2[i] = new int[spalte];
+    }
+
+    // Dateien öffnen
+    ifstream inputfile_1("C:/Users/Flix/Desktop/xyz_1.txt");
+    ifstream inputfile_2("C:/Users/Flix/Desktop/xyz_2.txt"); 
+
+    if (!(inputfile_1.is_open() && inputfile_2.is_open())) {
+        cout << "Fehler 1" << endl;
+        return 1;
+    }
+
+    // Rohdaten in data_1 und data_2 speichern
+    for (int z = 0; z < zeile; z++) {  
+        for (int s = 0; s < spalte; s++) {  
+            inputfile_1 >> data_1[z][s]; 
+            inputfile_2 >> data_2[z][s]; 
+        }
+    }
+
+    inputfile_1.close();
+    inputfile_2.close();
+
+
+/*
+    // nur data_2 ausgeben
+    for (int z = 0; z < zeile; z++) {
+        for (int s = 0; s < spalte; s++) {
+            cout << data_2[z][s] << "/t";
+        }
+        cout << endl;
+    }
+*/
+    // nur best. Felder zum Testen ausgeben
+    for (int z = 0; z < 3; z++) {
+        for (int s = 0; s < spalte; s++) {
+            // cout << "Feld aus data_1 [" <<z<<"] ["<<s<<"] = "<< data_1 [z] [s]<<endl;
+            cout << "Feld aus data_2 [" <<z<<"] ["<<s<<"] = "<< data_2 [z] [s]<<endl;
+        }
+    }
+
+
+    // Speicher freigeben
+    for (int i = 0; i < zeile; i++) {
+        delete[] data_1[i];
+        delete[] data_2[i];
+    }
+    delete[] data_1;
+    delete[] data_2;
+    return 0;
+}
