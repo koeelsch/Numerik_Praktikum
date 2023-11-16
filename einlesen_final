@@ -4,6 +4,8 @@
 
 using namespace std;
 
+// nächster Schritt von Kathi und Julius: Übergabe der x y Verschiebung der höchsten Korrelation in eine matrix [29] [21] [2], richtig?
+
 int main() {
 
     for (int i = 96; i <= 100; i++) {
