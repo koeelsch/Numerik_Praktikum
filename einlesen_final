@@ -1,0 +1,79 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+int main() {
+
+    for (int i = 96; i <= 100; i++) {
+        string dateiname_1 = "C:/Users/paulw/OneDrive/Desktop/Info Praktikum/Rohdaten/Date_Messdaten_TVL_" + to_string(i) + ".dat";
+        string dateiname_2 = "C:/Users/paulw/OneDrive/Desktop/Info Praktikum/Rohdaten/Date_Messdaten_TVL_" + to_string(i+1) + ".dat";
+
+        // Dateien öffnen
+        ifstream inputfile_1(dateiname_1.c_str());
+        ifstream inputfile_2(dateiname_2.c_str());
+
+        // Hat das geklappt?
+        if (!(inputfile_1.is_open() && inputfile_2.is_open())) {
+            cout << "Fehler beim Öffnen der Datei Nr." << i << " oder der Datei Nr." << i+1 << endl;
+            return 1;
+        }
+
+        // Definition von Spalten und Zeilen
+        int spalte, zeile;
+        inputfile_1 >> spalte >> zeile;
+        inputfile_2 >> spalte >> zeile;
+
+        // Allokieren des Speichers
+        int** data_1 = new int*[zeile];
+        int** data_2 = new int*[zeile];
+        for (int j = 0; j < zeile; j++) {
+            data_1[j] = new int[spalte];
+            data_2[j] = new int[spalte];
+        }
+
+        // input_files in data_1 und data_2 einlesen
+        for (int z = 0; z < zeile; z++) {
+            for (int s = 0; s < spalte; s++) {
+                inputfile_1 >> data_1[z][s];
+                inputfile_2 >> data_2[z][s];
+            }
+        }
+        inputfile_1.close();
+        inputfile_2.close();
+
+
+        // Ausgabe von Bild i
+        cout << endl << endl << "Das Bild Nr. "<<i<<" hat folgendes Format: " << spalte << " x " << zeile << endl;
+        cout << "Das ist der Pfad: " << dateiname_1 << endl;
+
+        int z = 0;
+        for (int s = 0; s < 10; s++) {
+            cout << "Feld aus data_1 [" << z << "] [" << s << "] = " << data_1[z][s] << endl;
+        }
+        for (int s = spalte-10; s < spalte; s++) {
+            cout << "Feld aus data_1 [" << zeile-1 << "] [" << s << "] = " << data_1[zeile-1][s] << endl;
+        }
+
+        // Ausgabe von Bild i+1
+        cout << endl << endl << "Das Bild Nr. "<<i+1<<" hat folgendes Format: " << spalte << " x " << zeile << endl;
+        cout << "Das ist der Pfad: " << dateiname_2 << endl;
+        for (int s = 0; s < 10; s++) {
+            cout << "Feld aus data_2 [" << z << "] [" << s << "] = " << data_2[z][s] << endl;
+        }
+        for (int s = spalte-10; s < spalte; s++) {
+            cout << "Feld aus data_2 [" << zeile-1 << "] [" << s << "] = " << data_2[zeile-1][s] << endl;
+        }
+        cout << endl << "------------------" << endl << endl;
+
+        // Matrizen leeren und löschen
+        for (int j = 0; j < zeile; j++) {
+            delete[] data_1[j];
+            delete[] data_2[j];
+        }
+        delete[] data_1;
+        delete[] data_2;
+    }
+    return 0;
+}
