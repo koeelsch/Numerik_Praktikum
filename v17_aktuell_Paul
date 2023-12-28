@@ -1,0 +1,200 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <chrono>
+#include <ctime>
+
+using namespace std;
+
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+
+// Definition von globalen Variablen, um sie in verschiedenen Funktionen zu verwenden
+vector<vector<int>> data_1;
+vector<vector<int>> data_2;
+string dateiname_1, dateiname_2;
+int spalte, zeile, i;
+
+
+void einlesen(int i) {
+    dateiname_1 = "C:/Users/paulw/OneDrive/Desktop/Info Praktikum/Rohdaten/Date_Messdaten_TVL_" + to_string(i) + ".dat";
+    dateiname_2 = "C:/Users/paulw/OneDrive/Desktop/Info Praktikum/Rohdaten/Date_Messdaten_TVL_" + to_string(i + 1) + ".dat";
+
+    // Dateien öffnen
+    ifstream inputfile_1(dateiname_1.c_str());
+    ifstream inputfile_2(dateiname_2.c_str());
+
+    // Hat das geklappt?
+    if (!(inputfile_1.is_open() && inputfile_2.is_open())) {
+        cout << "Fehler beim Öffnen der Datei Nr." << i << " oder der Datei Nr." << i + 1 << endl;
+        return;
+    }
+
+    // Größe der Bilder aus den Dateien lesen
+    int spalte_1, zeile_1, spalte_2, zeile_2;
+    inputfile_1 >> spalte_1 >> zeile_1;
+    inputfile_2 >> spalte_2 >> zeile_2;
+
+    // Überprüfen Sie, ob die Größen konsistent sind
+    if (spalte_1 != spalte_2 || zeile_1 != zeile_2) {
+        cout << "Fehler: Die Bildgrößen sind unterschieldich." << endl;
+        return;
+    }
+
+    // Vektoren für Daten erstellen und Größe festlegen
+    data_1.resize(zeile_1, vector<int>(spalte_1));
+    data_2.resize(zeile_2, vector<int>(spalte_2));
+
+    // Daten aus den Dateien in Vektoren schreiben
+    for (int z = 0; z < zeile_1; z++) {
+        for (int s = 0; s < spalte_1; s++) {
+            inputfile_1 >> data_1[z][s];
+            inputfile_2 >> data_2[z][s];
+        }
+    }
+
+    inputfile_1.close();
+    inputfile_2.close();
+}
+
+void zeit() {
+    auto currentTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    char timeString[100];
+    strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S", localtime(&currentTime));
+    cout << endl
+         << RED << "Aktuelle Uhrzeit: " << timeString << RESET << endl
+         << endl;
+}
+
+void vektoren_loeschen() {
+    // Automatische Freigabe des Speichers durch Vektoren
+    data_1.clear();
+    data_2.clear();
+}
+
+
+void ausgabe_1() {
+    cout << endl << endl << "Das Bild Nr. " << 96 + i << " hat folgendes Format: " << spalte << " x " << zeile << endl;
+    cout << "Das ist der Pfad: " << dateiname_1 << endl;
+
+    if (!data_1.empty()) {
+        int z = 0;
+
+        // Überprüfen Sie, ob genügend Elemente in der ersten Zeile vorhanden sind
+        if (spalte > 10) {
+            for (int s = 0; s < 10; s++) {
+                cout << "Feld aus data_1 [" << z << "] [" << s << "] = " << data_1[z][s] << endl;
+            }
+        }
+
+        // Überprüfen Sie, ob genügend Elemente in der letzten Zeile vorhanden sind
+        if (zeile > 0 && spalte > 10) {
+            for (int s = spalte - 10; s < spalte; s++) {
+                cout << "Feld aus data_1 [" << zeile - 1 << "] [" << s << "] = " << data_1[zeile - 1][s] << endl;
+            }
+        }
+    }
+
+    // Ausgabe von Bild i+1
+    cout << endl << endl << "Das Bild Nr. " << i + 97 << " hat folgendes Format: " << spalte << " x " << zeile << endl;
+    cout << "Das ist der Pfad: " << dateiname_2 << endl;
+
+    if (!data_2.empty()) {
+        int z = 0;
+
+        // Überprüfen Sie, ob genügend Elemente in der ersten Zeile vorhanden sind
+        if (spalte > 10) {
+            for (int s = 0; s < 10; s++) {
+                cout << "Feld aus data_2 [" << z << "] [" << s << "] = " << data_2[z][s] << endl;
+            }
+        }
+
+        // Überprüfen Sie, ob genügend Elemente in der letzten Zeile vorhanden sind
+        if (zeile > 0 && spalte > 10) {
+            for (int s = spalte - 10; s < spalte; s++) {
+                cout << "Feld aus data_2 [" << zeile - 1 << "] [" << s << "] = " << data_2[zeile - 1][s] << endl;
+            }
+        }
+    }
+
+    cout << endl << "------------------" << endl << endl;
+}
+
+
+
+void kreuzkorrelation(const vector<vector<int>>& data, int groesse_auswertungsfenster, int max_verschiebung, int x1, int y1, int& verschiebung_x, int& verschiebung_y, double& sum1) {
+    verschiebung_x = 0;
+    verschiebung_y = 0;
+    sum1 = 0.0;
+
+    for (int i = -1 * max_verschiebung; i <= max_verschiebung; i++) { // Verschiebung in x-Richtung
+        for (int j = -1 * max_verschiebung; j < max_verschiebung; j++) { // Verschiebung in y-Richtung
+            double sum2 = 0.0; 
+
+            // aktuelle Kreuzkorrelation
+            for (int x = 0; x < groesse_auswertungsfenster; x++) {
+                for (int y = 0; y < groesse_auswertungsfenster; y++) {
+                    sum2 += data_1[y1 + y][x1 + x] * data_2[y1 + j + y][x1 + i + x]; 
+                }
+            }
+
+            // höchste Korrelation wird genommen
+            if (sum2 > sum1) {
+                verschiebung_x = j;
+                verschiebung_y = i;
+                sum1 = sum2;
+            }
+        }
+    }
+}
+
+// berechnet und gibt das Verschiebungsfeld aus
+vector<vector<vector<int>>> berechneVerschiebungsmatrix(const vector<vector<int>>& data, int groesse_auswertungsfenster, int max_verschiebung) {
+    vector<vector<vector<int>>> verschiebungsmatrix;
+
+    if (data.empty() || data[0].empty()) {
+        cout << "Fehler: wahrscheinlihc Einlesefehler." << endl;
+    }
+
+    int max_x = (data[0].size() - 2 * max_verschiebung) / groesse_auswertungsfenster;
+    int max_y = (data.size() - 2 * max_verschiebung) / groesse_auswertungsfenster;
+
+    cout << "max_x: " << max_x << "; max_y: " << max_y << endl;
+
+    verschiebungsmatrix.resize(max_y, vector<vector<int>>(max_x, vector<int>(2)));
+
+    for (int i = 0; i < max_y; i++) {
+        for (int j = 0; j < max_x; j++) {
+            int x1 = j * groesse_auswertungsfenster + max_verschiebung;
+            int y1 = i * groesse_auswertungsfenster + max_verschiebung;
+            int verschiebung_x, verschiebung_y;
+            double sum1;
+            kreuzkorrelation(data, groesse_auswertungsfenster, max_verschiebung, x1, y1, verschiebung_x, verschiebung_y, sum1);
+            verschiebungsmatrix[i][j][0] = verschiebung_x;
+            verschiebungsmatrix[i][j][1] = verschiebung_y;
+            cout << "[" << i << "] [" << j << "] [" << verschiebungsmatrix[i][j][0] << "/" << verschiebungsmatrix[i][j][1] << "]" << endl;
+        }
+    }
+
+    return verschiebungsmatrix;
+}
+
+int main() {
+    einlesen(96);
+    zeit();
+    
+    int groesse_auswertungsfenster = 32;
+    int max_verschiebung = 5; 
+    int x1 = 10; // x-Wert muss bei "Spalte" eingetragen werden 
+    int y1 = 10;
+
+    if (max_verschiebung > x1 || max_verschiebung > y1)
+        cout << "Fehler: max_verschiebung > x1/y1" << endl;
+
+    vector<vector<vector<int>>> verschiebungsmatrix = berechneVerschiebungsmatrix(data_1, groesse_auswertungsfenster, max_verschiebung);
+
+
+    vektoren_loeschen();
+    return 0;
+}
+
